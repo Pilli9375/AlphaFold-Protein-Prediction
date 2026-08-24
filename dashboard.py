@@ -44,7 +44,7 @@ class GIN(torch.nn.Module):
 def load_model():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = GIN(20).to(device)
-    model_path = Path('C:/Pilli/DL/Project/trained_protein_model.pth')
+    model_path = Path(__file__).parent.resolve() / 'trained_protein_model.pth'
     if model_path.exists():
         model.load_state_dict(torch.load(str(model_path), map_location=device))
     model.eval()

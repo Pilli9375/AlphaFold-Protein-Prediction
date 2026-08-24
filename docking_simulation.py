@@ -42,7 +42,7 @@ def geometric_compatibility_score(prot_coords, drug_coords):
     return float(score)
 
 def main():
-    base_dir = Path("C:/Pilli/DL/Project/Datasets")
+    base_dir = Path(__file__).parent.resolve() / "Datasets"
     prot_dir = base_dir / "01"
     drug_dir = base_dir / "02"
     

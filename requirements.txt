@@ -1,0 +1,11 @@
+torch
+torch-geometric
+rdkit
+streamlit
+plotly
+py3Dmol
+stmol
+scipy
+numpy
+pandas
+biopython
