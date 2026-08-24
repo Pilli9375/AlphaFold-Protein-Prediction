@@ -65,7 +65,14 @@ risk_mapping = {'Alpha-Synuclein.pdb': 0.9, 'Amyloid-Beta (Aβ).pdb': 0.8, 'hemo
 protein_labels = [risk_mapping.get(p.name, 0.5) for p in protein_files]
 drug_labels    = [1.19, 0.90, -0.07, 2.30, 1.40, 1.20, 0.46, 1.05, 2.10, 1.20, 0.46, 0.80]
 
-protein_dataset = [pdb_to_graph(p, l) for p, l in zip(protein_files, protein_labels)]
+base_proteins = [pdb_to_graph(p, risk_mapping.get(p.name, 0.5)) for p in protein_files]
+protein_dataset = []
+for g in base_proteins:
+    protein_dataset.append(g)
+    for _ in range(15):  # Create 15 augmented clones
+        g_clone = g.clone()
+        g_clone.x = g_clone.x + torch.randn_like(g_clone.x) * 0.05
+        protein_dataset.append(g_clone)
 drug_dataset    = [mol_to_graph(s, l) for s, l in zip(drug_sdf_paths, drug_labels)]
 
 def normalise(dataset, n_train):

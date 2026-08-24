@@ -8,7 +8,7 @@ from rdkit import Chem
 import numpy as np
 
 current_dir = Path(__file__).parent.resolve()
-model_path = current_dir / "trained_model_composition.pth"
+model_path = current_dir / "trained_drug_model.pth"
 test_folder = current_dir / "test" / "02"
 
 DRUG_NAMES = {
