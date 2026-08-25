@@ -1,3 +1,5 @@
+import os
+os.environ["STREAMLIT_SERVER_ENABLE_FILE_WATCHER"] = "false"
 import streamlit as st
 import pandas as pd
 import py3Dmol
