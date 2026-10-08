@@ -293,3 +293,10 @@ with tab3:
         </ul>
     </div>
     """, unsafe_allow_html=True)
+    
+    st.markdown("### Model Performance Metrics")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.image("training_curves.png", use_container_width=True, caption="Training & Validation Convergence")
+    with col2:
+        st.image("confusion_matrix.png", use_container_width=True, caption="Pathology Confusion Matrix")
