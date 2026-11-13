@@ -13,6 +13,8 @@ Generates:
 """
 
 import os
+import warnings
+warnings.filterwarnings("ignore")
 from pathlib import Path
 import numpy as np
 import pandas as pd
