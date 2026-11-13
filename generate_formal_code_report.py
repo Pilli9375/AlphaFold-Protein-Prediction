@@ -87,9 +87,36 @@ def add_heading_2(doc, text):
     run.font.color.rgb = RGBColor(15, 60, 115)
     return p
 
+def add_bullet_item(doc, bullet_title, desc):
+    """Adds a clean academic bullet item with no text-stretching issues."""
+    p = doc.add_paragraph()
+    p.paragraph_format.left_indent = Inches(0.25)
+    p.paragraph_format.first_line_indent = Inches(-0.25)
+    p.paragraph_format.space_before = Pt(2)
+    p.paragraph_format.space_after = Pt(5)
+    p.paragraph_format.line_spacing = 1.15
+    p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    
+    r_sym = p.add_run("▪  ")
+    r_sym.font.name = 'Arial'
+    r_sym.font.size = Pt(8.5)
+    r_sym.font.color.rgb = RGBColor(0, 33, 71)
+
+    r_title = p.add_run(bullet_title)
+    r_title.font.name = 'Courier New' if '.' in bullet_title else 'Times New Roman'
+    r_title.font.size = Pt(10.5)
+    r_title.font.bold = True
+    r_title.font.color.rgb = RGBColor(0, 33, 71)
+
+    r_desc = p.add_run(" " + desc)
+    r_desc.font.name = 'Times New Roman'
+    r_desc.font.size = Pt(11)
+    r_desc.font.color.rgb = RGBColor(40, 40, 40)
+    return p
+
 def add_body_paragraph(doc, text):
     p = doc.add_paragraph()
-    p.paragraph_format.line_spacing = 1.5
+    p.paragraph_format.line_spacing = 1.25
     p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     p.paragraph_format.space_after = Pt(6)
     run = p.add_run(text)
@@ -321,41 +348,125 @@ def generate_formal_code_report():
     add_body_paragraph(doc, arch_p1)
 
     add_heading_2(doc, "1.1 Core Modules & Software Structure")
-    mod_p = (
-        "• dashboard.py: Serves as the primary graphical user interface. Implemented via Streamlit, it enables client-side .pdb "
-        "file uploads, triggers live on-the-fly PyTorch GIN inference, renders interactive 3D structures with py3Dmol WebGL shaders, "
-        "plots horizontal docking compatibility rankings, and hosts the Review 3 multi-model benchmarking dashboard.\n"
-        "• docking_simulation.py: Executes high-throughput geometric docking between target proteins and candidate ligands. "
-        "Implements RDKit molecular sanitization, applies a 15x Gaussian coordinate perturbation protocol, calculates bounding boxes, "
-        "and computes docking compatibility scores via SciPy spatial distance matrices.\n"
-        "• compare_three_models.py: Implements the empirical Review 3 benchmarking suite. Compares a 3-layer Baseline GCN, "
-        "a 3-layer Multi-Head GAT, and the Proposed 3D GIN across 80 training epochs, programmatically exporting convergence curves, "
-        "diagnostic confusion matrices, grouped bar charts, and a structured CSV summary.\n"
-        "• generate_metrics.py: Generates high-resolution performance plots for standalone verification, including 80-epoch training MSE loss "
-        "vs. validation accuracy curves and the dark-themed pathology confusion matrix heatmap.\n"
-        "• requirements.txt: Defines the strict Python environment specification, pinning necessary packages including PyTorch, "
-        "PyTorch Geometric, RDKit, BioPython, Streamlit, py3Dmol, and SciPy."
-    )
-    add_body_paragraph(doc, mod_p)
+    
+    modules_info = [
+        ("dashboard.py:", "Serves as the primary graphical user interface. Implemented via Streamlit, it enables client-side .pdb file uploads, triggers live on-the-fly PyTorch GIN inference, renders interactive 3D structures with py3Dmol WebGL shaders, plots horizontal docking compatibility rankings, and hosts the Review 3 multi-model benchmarking dashboard."),
+        ("docking_simulation.py:", "Executes high-throughput geometric docking between target proteins and candidate ligands. Implements RDKit molecular sanitization, applies a 15x Gaussian coordinate perturbation protocol, calculates bounding boxes, and computes docking compatibility scores via SciPy spatial distance matrices."),
+        ("compare_three_models.py:", "Implements the empirical Review 3 benchmarking suite. Compares a 3-layer Baseline GCN, a 3-layer Multi-Head GAT, and the Proposed 3D GIN across 80 training epochs, programmatically exporting convergence curves, diagnostic confusion matrices, grouped bar charts, and a structured CSV summary."),
+        ("generate_metrics.py:", "Generates high-resolution performance plots for standalone verification, including 80-epoch training MSE loss vs. validation accuracy curves and the dark-themed pathology confusion matrix heatmap."),
+        ("requirements.txt:", "Defines the strict Python environment specification, pinning necessary packages including PyTorch, PyTorch Geometric, RDKit, BioPython, Streamlit, py3Dmol, and SciPy.")
+    ]
+
+    for mod_title, mod_desc in modules_info:
+        add_bullet_item(doc, mod_title, mod_desc)
+
+    # Clean Page Break so Section 1.2 is neatly on Page 4 without awkward splits
+    doc.add_page_break()
 
     add_heading_2(doc, "1.2 Environment Setup & Execution Guidelines")
-    setup_p = (
-        "Prerequisites:\n"
-        "The software runs on Windows, Linux, and macOS platforms equipped with Python 3.10 or higher. A CUDA-compatible GPU is supported "
-        "for accelerated training, while CPU fallback inference executes in under 200 ms per macromolecular structure.\n\n"
-        "Step 1: Environment Installation\n"
-        "Clone the repository and install all required runtime dependencies:\n"
-        "git clone https://github.com/Pilli9375/AlphaFold-Protein-Prediction.git\n"
-        "cd AlphaFold-Protein-Prediction\n"
-        "pip install -r requirements.txt\n\n"
-        "Step 2: Launching the Interactive Web Application\n"
-        "Execute the dashboard on the dedicated local port (8502):\n"
-        "python -m streamlit run dashboard.py --server.port 8502\n\n"
-        "Step 3: Running Model Comparison & Benchmark Generation\n"
-        "To re-evaluate all three models (GCN, GAT, GIN) and refresh comparison charts:\n"
-        "python compare_three_models.py"
+    
+    prereq_text = (
+        "The software suite is architected for cross-platform execution across Windows, Linux, and macOS environments "
+        "equipped with Python 3.10 or higher. CUDA-compatible GPUs (NVIDIA CUDA 11.8+) are automatically leveraged for accelerated "
+        "tensor operations, while an integrated CPU fallback ensures real-time inference in under 200 ms per macromolecular structure."
     )
-    add_body_paragraph(doc, setup_p)
+    add_body_paragraph(doc, prereq_text)
+
+    # Executive Execution Table
+    p_tbl_lbl = doc.add_paragraph()
+    p_tbl_lbl.paragraph_format.space_before = Pt(8)
+    p_tbl_lbl.paragraph_format.space_after = Pt(6)
+    p_tbl_lbl.paragraph_format.keep_with_next = True
+    r_tbl_lbl = p_tbl_lbl.add_run("Table 1.1: System Setup and Pipeline Execution Reference")
+    r_tbl_lbl.font.name = 'Times New Roman'
+    r_tbl_lbl.font.size = Pt(11)
+    r_tbl_lbl.font.bold = True
+    r_tbl_lbl.font.color.rgb = RGBColor(0, 33, 71)
+
+    exec_table = doc.add_table(rows=1, cols=3)
+    exec_table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    exec_widths = [Inches(1.6), Inches(3.2), Inches(2.0)]
+
+    exec_hdr = exec_table.rows[0].cells
+    hdr_titles = ["Phase / Stage", "Terminal CLI Command", "Operational Scope & Output"]
+    for i, title in enumerate(hdr_titles):
+        exec_hdr[i].width = exec_widths[i]
+        p = exec_hdr[i].paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        r = p.add_run(title)
+        r.font.name = 'Times New Roman'
+        r.font.size = Pt(10)
+        r.font.bold = True
+        r.font.color.rgb = RGBColor(255, 255, 255)
+        set_cell_background(exec_hdr[i], '002147')
+        set_cell_margins(exec_hdr[i], top=70, bottom=70, left=90, right=90)
+
+    exec_steps = [
+        (
+            "Step 1: Environment Installation",
+            "git clone https://github.com/Pilli9375/AlphaFold-Protein-Prediction.git\ncd AlphaFold-Protein-Prediction\npip install -r requirements.txt",
+            "Clones repository and installs PyTorch, PyTorch Geometric, RDKit, BioPython, and dependencies."
+        ),
+        (
+            "Step 2: Launch Interactive Web App",
+            "python -m streamlit run dashboard.py --server.port 8502",
+            "Launches clinical dashboard on port 8502 with 3D WebGL molecular visualizer and Review 3 tabs."
+        ),
+        (
+            "Step 3: Multi-Model Benchmark",
+            "python compare_three_models.py",
+            "Evaluates Baseline GCN, Multi-Head GAT, and Proposed 3D GIN over 80 epochs; regenerates charts."
+        ),
+        (
+            "Step 4: Formal Report Compilation",
+            "python generate_report.py\npython generate_formal_code_report.py",
+            "Compiles academic project report and source code documentation into standardized DOCX and PDF deliverables."
+        )
+    ]
+
+    for step_title, cmd_text, desc_text in exec_steps:
+        row = exec_table.add_row()
+        cells = row.cells
+        
+        # Step cell
+        cells[0].width = exec_widths[0]
+        p0 = cells[0].paragraphs[0]
+        p0.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        r0 = p0.add_run(step_title)
+        r0.font.name = 'Times New Roman'
+        r0.font.size = Pt(9.5)
+        r0.font.bold = True
+        r0.font.color.rgb = RGBColor(15, 60, 115)
+        
+        # Command cell
+        cells[1].width = exec_widths[1]
+        for cmd_idx, line in enumerate(cmd_text.split('\n')):
+            p1 = cells[1].paragraphs[0] if cmd_idx == 0 else cells[1].add_paragraph()
+            p1.paragraph_format.space_before = Pt(1)
+            p1.paragraph_format.space_after = Pt(1)
+            p1.paragraph_format.line_spacing = 1.0
+            r1 = p1.add_run(line)
+            r1.font.name = 'Courier New'
+            r1.font.size = Pt(8.5)
+            r1.font.color.rgb = RGBColor(30, 41, 59)
+        set_cell_background(cells[1], 'F1F5F9')
+        
+        # Description cell
+        cells[2].width = exec_widths[2]
+        p2 = cells[2].paragraphs[0]
+        p2.paragraph_format.line_spacing = 1.15
+        p2.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        r2 = p2.add_run(desc_text)
+        r2.font.name = 'Times New Roman'
+        r2.font.size = Pt(9.0)
+        r2.font.color.rgb = RGBColor(50, 50, 50)
+        
+        for c_idx, cell in enumerate(cells):
+            set_cell_margins(cell, top=60, bottom=60, left=80, right=80)
+            if c_idx != 1:
+                set_cell_background(cell, 'FFFFFF' if len(exec_table.rows) % 2 == 0 else 'F8FAFC')
+
+    set_table_borders(exec_table, color='D1D5DB', sz='4')
 
     doc.add_page_break()
 
