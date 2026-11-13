@@ -166,10 +166,20 @@ def set_table_borders(table, color='B0BEC5', sz='4', val='single'):
         tblBorders.append(border)
     tblPr.append(tblBorders)
 
+def keep_table_together(table):
+    """Ensures table header repeats on every new page and rows never split across page boundaries."""
+    for i, row in enumerate(table.rows):
+        trPr = row._tr.get_or_add_trPr()
+        cantSplit = OxmlElement('w:cantSplit')
+        trPr.append(cantSplit)
+        if i == 0:
+            tblHeader = OxmlElement('w:tblHeader')
+            trPr.append(tblHeader)
+
 def add_heading_1(doc, text):
     p = doc.add_paragraph()
-    p.paragraph_format.space_before = Pt(18)
-    p.paragraph_format.space_after = Pt(8)
+    p.paragraph_format.space_before = Pt(16)
+    p.paragraph_format.space_after = Pt(6)
     p.paragraph_format.keep_with_next = True
     run = p.add_run(text)
     run.font.name = 'Times New Roman'
@@ -180,42 +190,77 @@ def add_heading_1(doc, text):
 
 def add_heading_2(doc, text):
     p = doc.add_paragraph()
-    p.paragraph_format.space_before = Pt(14)
-    p.paragraph_format.space_after = Pt(6)
+    p.paragraph_format.space_before = Pt(12)
+    p.paragraph_format.space_after = Pt(4)
     p.paragraph_format.keep_with_next = True
     run = p.add_run(text)
     run.font.name = 'Times New Roman'
-    run.font.size = Pt(14)
+    run.font.size = Pt(13.5)
     run.font.bold = True
     run.font.color.rgb = RGBColor(15, 60, 115)
     return p
 
 def add_body_paragraph(doc, text):
     p = doc.add_paragraph()
-    p.paragraph_format.line_spacing = 1.5
+    p.paragraph_format.line_spacing = 1.2
     p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-    p.paragraph_format.space_after = Pt(6)
+    p.paragraph_format.space_before = Pt(0)
+    p.paragraph_format.space_after = Pt(4)
     run = p.add_run(text)
     run.font.name = 'Times New Roman'
     run.font.size = Pt(12)
     run.font.color.rgb = RGBColor(30, 30, 30)
     return p
 
+def add_equation(doc, eq_text):
+    p = doc.add_paragraph()
+    p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.paragraph_format.space_before = Pt(4)
+    p.paragraph_format.space_after = Pt(4)
+    run = p.add_run(eq_text)
+    run.font.name = 'Cambria Math'
+    run.font.size = Pt(11)
+    run.font.italic = True
+    run.font.color.rgb = RGBColor(10, 30, 60)
+    return p
+
+def add_numbered_item(doc, num_title, text):
+    p = doc.add_paragraph()
+    p.paragraph_format.left_indent = Inches(0.28)
+    p.paragraph_format.first_line_indent = Inches(-0.28)
+    p.paragraph_format.line_spacing = 1.15
+    p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    p.paragraph_format.space_before = Pt(2)
+    p.paragraph_format.space_after = Pt(4)
+    
+    r_t = p.add_run(num_title + " ")
+    r_t.font.name = 'Times New Roman'
+    r_t.font.size = Pt(11.5)
+    r_t.font.bold = True
+    r_t.font.color.rgb = RGBColor(0, 33, 71)
+    
+    r_b = p.add_run(text)
+    r_b.font.name = 'Times New Roman'
+    r_b.font.size = Pt(11.5)
+    r_b.font.color.rgb = RGBColor(40, 40, 40)
+    return p
+
 def add_centered_image(doc, img_path, width, caption_text):
     p_img = doc.add_paragraph()
     p_img.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p_img.paragraph_format.space_before = Pt(12)
-    p_img.paragraph_format.space_after = Pt(4)
+    p_img.paragraph_format.space_before = Pt(6)
+    p_img.paragraph_format.space_after = Pt(2)
+    p_img.paragraph_format.keep_with_next = True
     run = p_img.add_run()
     run.add_picture(str(img_path), width=width)
     
     p_cap = doc.add_paragraph()
     p_cap.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_cap.paragraph_format.space_before = Pt(2)
-    p_cap.paragraph_format.space_after = Pt(12)
+    p_cap.paragraph_format.space_after = Pt(8)
     run_cap = p_cap.add_run(caption_text)
     run_cap.font.name = 'Times New Roman'
-    run_cap.font.size = Pt(11)
+    run_cap.font.size = Pt(10)
     run_cap.font.italic = True
     run_cap.font.color.rgb = RGBColor(70, 70, 70)
 
@@ -365,15 +410,15 @@ def generate_full_report():
         ("5.2", "Pre-processing & 15x 3D Coordinate Augmentation", "10"),
         ("5.3", "Feature Extraction (3D Spatial Graph Construction)", "11"),
         ("5.4", "Feature Selection & Graph Isomorphism Pooling", "11"),
-        ("5.5", "Classification, Architecture Comparison (GIN vs CNN/LSTM) & Docking Output", "12"),
-        ("6.0", "Results & Empirical Discussion", "14"),
-        ("6.1", "Classification Performance Metrics & Statistical Evaluation", "14"),
-        ("6.2", "Training Convergence & Loss/Accuracy Trajectory Analysis", "15"),
-        ("6.3", "Pathology Confusion Matrix & Diagnostic Sensitivity", "16"),
+        ("5.5", "Classification, Architecture Comparison (GIN vs CNN/LSTM) & Docking Output", "11"),
+        ("6.0", "Results & Empirical Discussion", "13"),
+        ("6.1", "Classification Performance Metrics & Statistical Evaluation", "13"),
+        ("6.2", "Training Convergence & Loss/Accuracy Trajectory Analysis", "14"),
+        ("6.3", "Pathology Confusion Matrix & Diagnostic Sensitivity", "15"),
         ("6.4", "Automated Geometric Docking Simulation & Lead Drug Scoring", "16"),
         ("6.5", "Comparative Analysis of Three Models (GCN vs GAT vs GIN)", "17"),
-        ("7.0", "Conclusion & Future Research Trajectory", "21"),
-        ("8.0", "References (40 Complete IEEE-Formatted Citations)", "22")
+        ("7.0", "Conclusion & Future Research Trajectory", "19"),
+        ("8.0", "References (40 Complete IEEE-Formatted Citations)", "20")
     ]
     
     for sec_num, sec_title, p_num in toc_items:
@@ -589,6 +634,7 @@ def generate_full_report():
             set_cell_margins(cell, top=50, bottom=50, left=60, right=60)
             
     set_table_borders(table, color='CBD5E1', sz='4')
+    keep_table_together(table)
     
     p_tbl_cap = doc.add_paragraph()
     p_tbl_cap.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -658,11 +704,15 @@ def generate_full_report():
     
     # 5.2 Pre-processing & 15x 3D Augmentation
     add_heading_2(doc, "5.2 Pre-processing & 15x 3D Augmentation")
-    prep_text = (
+    prep_text_1 = (
         "Raw crystallographic coordinates underwent rigorous chemical sanitization using the RDKit open-source cheminformatics toolkit [28]. "
         "Water molecules, crystallographic counter-ions, and non-canonical heteroatoms were stripped, followed by explicit valency verification "
         "and aromatic bond assignment. For proteins, the center of mass was translated to the Cartesian origin (0, 0, 0) to ensure translational "
-        "invariance across all subsequent computational operators.\n\n"
+        "invariance across all subsequent computational operators."
+    )
+    add_body_paragraph(doc, prep_text_1)
+    
+    prep_text_2 = (
         "To decisively eradicate overfitting stemming from limited structural training instances, we formulated a 15-fold spatial augmentation "
         "strategy. For each target protein, fifteen distinct structural replicas were synthetically synthesized by applying isotropic Gaussian "
         "coordinate jittering to every Alpha-Carbon (C-alpha) atom: x_aug = x_orig + epsilon, where epsilon ~ N(0, sigma^2) with sigma = 0.05 Å. "
@@ -670,60 +720,82 @@ def generate_full_report():
         "temperatures (310 K) without disrupting secondary alpha-helix or beta-sheet hydrogen bonding networks. This protocol expanded the baseline "
         "dataset fifteen-fold into 120 augmented macromolecular structural instances, guaranteeing regularized, generalizable neural training."
     )
-    add_body_paragraph(doc, prep_text)
+    add_body_paragraph(doc, prep_text_2)
     
     # 5.3 Feature Extraction
     add_heading_2(doc, "5.3 Feature Extraction (3D Spatial Graph Construction)")
-    feat_text = (
+    feat_text_1 = (
         "Cleaned 3D atomic structures are mathematically converted into spatial undirected graphs G = (V, E). For proteins, each amino acid "
         "residue constitutes a graph node v_i in V, localized at its respective C-alpha Cartesian coordinate. Node features are represented as "
         "a 20-dimensional one-hot encoding corresponding to the twenty standard canonical amino acids: h_i in {0, 1}^20 (Alanine, Arginine, "
         "Asparagine, Aspartate, Cysteine, Glutamate, Glutamine, Glycine, Histidine, Isoleucine, Leucine, Lysine, Methionine, Phenylalanine, "
-        "Proline, Serine, Threonine, Tryptophan, Tyrosine, Valine).\n\n"
+        "Proline, Serine, Threonine, Tryptophan, Tyrosine, Valine)."
+    )
+    add_body_paragraph(doc, feat_text_1)
+    
+    feat_text_2 = (
         "Spatial edges e_ij in E are constructed dynamically by applying a strict Euclidean radial cutoff threshold: an edge connects residue i "
         "and residue j if and only if ||pos_i - pos_j||_2 < 8.0 Å. This 8.0 Å sphere encompasses all critical non-covalent interactions, including "
         "salt bridges, hydrogen bonds, and hydrophobic van der Waals contacts. For candidate small-molecule drugs, molecular graphs are derived "
         "using 9-dimensional atomic feature vectors capturing element type, hybridization state, formal charge, implicit hydrogen count, and "
         "covalent topological connectivity."
     )
-    add_body_paragraph(doc, feat_text)
+    add_body_paragraph(doc, feat_text_2)
     
     # 5.4 Feature Selection & Graph Pooling
     add_heading_2(doc, "5.4 Feature Selection & Graph Pooling")
-    pool_text = (
+    pool_text_1 = (
         "To perform expressive hierarchical feature extraction, node embeddings are propagated through three stacked Graph Isomorphism "
         "Network (GINConv) layers [2] implemented in PyTorch Geometric [27]. In accordance with graph isomorphism theory, standard graph "
         "convolutional aggregations (mean or max) fail to distinguish simple non-isomorphic graph structures. GIN resolves this by employing "
-        "an injective multiset neighborhood sum aggregation:\n\n"
-        "h_i^(k) = MLP^(k) ( (1 + eps^(k)) * h_i^(k-1) + SUM_{j in N(i)} h_j^(k-1) )\n\n"
+        "an injective multiset neighborhood sum aggregation:"
+    )
+    add_body_paragraph(doc, pool_text_1)
+    
+    add_equation(doc, "h_i^(k) = MLP^(k) ( (1 + eps^(k)) * h_i^(k-1) + SUM_{j in N(i)} h_j^(k-1) )")
+    
+    pool_text_2 = (
         "where k in {1, 2, 3} denotes layer depth, eps is a learnable parameter, and MLP^(k) represents a parameterized two-layer Multi-Layer "
         "Perceptron equipped with Batch Normalization (BatchNorm1d) and Rectified Linear Unit (ReLU) activation functions. Each GIN layer maps "
         "features across 64 hidden dimensions. Following the final convolution, node representations are compressed into a fixed-size graph-level "
         "embedding vector h_G via Global Add Pooling (global_add_pool), which preserves total structural volume and multiset node frequencies. "
         "A dropout rate of p = 0.5 is enforced prior to the final linear regression head to suppress co-adaptation of hidden features."
     )
-    add_body_paragraph(doc, pool_text)
+    add_body_paragraph(doc, pool_text_2)
     
     # 5.5 Classification & Docking Output
     add_heading_2(doc, "5.5 Classification, Architecture Comparison (GIN vs. CNN/LSTM) & Docking Output")
-    comp_text = (
-        "Why GIN Outperforms Traditional Architectures (CNN / LSTM):\n"
-        "1. Invariance to Rigid Body Transformations: Unlike 3D CNNs whose voxelized inputs shift upon rotation, graph message passing is "
-        "intrinsically permutation-invariant and translation-invariant, eliminating the need for massive rotational data over-sampling.\n"
-        "2. Long-Range Non-Local Contacts: While 1D CNNs and LSTMs process amino acids in sequential order and struggle with relationships "
-        "spanning large sequence intervals, GIN graphs directly connect residues that are spatially contiguous (< 8.0 Å) in 3D folded space.\n"
-        "3. Computational Efficiency: 3D CNNs suffer from cubic spatial complexity O(N^3) with respect to bounding box resolution, whereas GIN "
-        "operates strictly over non-zero physical edges O(|V| + |E|), accelerating inference by over two orders of magnitude.\n\n"
-        "Automated Geometric Docking Mechanism:\n"
-        "To evaluate therapeutic binding potential without requiring days of empirical physical search, we implemented an automated geometric docking "
-        "engine utilizing SciPy spatial algorithms [29]. For any protein-drug candidate pair, the 3D atomic coordinates of the drug are projected "
-        "into the spatial bounding box of the target protein. The geometric compatibility score S_dock is computed as:\n\n"
-        "S_dock = ( N_contact * 1000 ) / ( 1.0 + d_min + 0.1 * R_gyration )\n\n"
-        "where N_contact represents the number of interatomic contacts within a 4.5 Å interaction threshold, d_min is the minimum atomic distance, "
-        "and R_gyration denotes the ligand radius of gyration. Scores are categorized into binding affinity tiers, with scores > 600 indicating "
-        "high affinity suitable for lead optimization."
+    
+    p_gin_why = add_body_paragraph(doc, "Why GIN Outperforms Traditional Architectures (CNN / LSTM):")
+    p_gin_why.runs[0].font.bold = True
+    p_gin_why.runs[0].font.color.rgb = RGBColor(15, 60, 115)
+    
+    add_numbered_item(doc, "1. Invariance to Rigid Body Transformations:", 
+                      "Unlike 3D CNNs whose voxelized inputs shift upon rotation, graph message passing is intrinsically permutation-invariant and translation-invariant, eliminating the need for massive rotational data over-sampling.")
+    add_numbered_item(doc, "2. Long-Range Non-Local Contacts:", 
+                      "While 1D CNNs and LSTMs process amino acids in sequential order and struggle with relationships spanning large sequence intervals, GIN graphs directly connect residues that are spatially contiguous (< 8.0 Å) in 3D folded space.")
+    add_numbered_item(doc, "3. Computational Efficiency:", 
+                      "3D CNNs suffer from cubic spatial complexity O(N^3) with respect to bounding box resolution, whereas GIN operates strictly over non-zero physical edges O(|V| + |E|), accelerating inference by over two orders of magnitude.")
+    
+    p_dock_sub = add_body_paragraph(doc, "Automated Geometric Docking Mechanism:")
+    p_dock_sub.runs[0].font.bold = True
+    p_dock_sub.runs[0].font.color.rgb = RGBColor(15, 60, 115)
+    
+    dock_mech_p1 = (
+        "To evaluate therapeutic binding potential without requiring days of empirical physical search, we implemented an automated "
+        "geometric docking engine utilizing SciPy spatial algorithms [29]. For any protein-drug candidate pair, the 3D atomic coordinates "
+        "of the drug are projected into the spatial bounding box of the target protein. The geometric compatibility score S_dock is computed as:"
     )
-    add_body_paragraph(doc, comp_text)
+    add_body_paragraph(doc, dock_mech_p1)
+    
+    add_equation(doc, "S_dock = ( N_contact * 1000 ) / ( 1.0 + d_min + 0.1 * R_gyration )")
+    
+    dock_mech_p2 = (
+        "where N_contact represents the number of interatomic contacts within a 4.5 Å interaction threshold, d_min is the minimum atomic "
+        "distance, and R_gyration denotes the ligand radius of gyration. Scores are categorized into binding affinity tiers, with scores > 600 "
+        "indicating high affinity suitable for lead optimization."
+    )
+    add_body_paragraph(doc, dock_mech_p2)
     
     doc.add_page_break()
     
@@ -786,6 +858,7 @@ def generate_full_report():
             set_cell_margins(cell, top=60, bottom=60, left=80, right=80)
             
     set_table_borders(tbl_m, color='CBD5E1', sz='4')
+    keep_table_together(tbl_m)
     
     p_m_cap = doc.add_paragraph()
     p_m_cap.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -832,6 +905,7 @@ def generate_full_report():
     add_body_paragraph(doc, cm_text)
     
     # 6.4 Docking Interactions
+    doc.add_page_break()
     add_heading_2(doc, "6.4 Automated Geometric Docking Simulation & Lead Drug Scoring")
     
     dock_text = (
@@ -883,6 +957,7 @@ def generate_full_report():
             set_cell_margins(cell, top=60, bottom=60, left=70, right=70)
             
     set_table_borders(tbl_d, color='CBD5E1', sz='4')
+    keep_table_together(tbl_d)
     
     p_d_cap = doc.add_paragraph()
     p_d_cap.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -906,6 +981,7 @@ def generate_full_report():
     add_body_paragraph(doc, dock_disc)
     
     # 6.5 Comparative Analysis of Three Deep Learning Models (GCN vs GAT vs GIN)
+    doc.add_page_break()
     add_heading_2(doc, "6.5 Comparative Analysis of Three Deep Learning Models: GCN vs. GAT vs. Proposed 3D GIN")
     
     comp_intro = (
@@ -957,11 +1033,12 @@ def generate_full_report():
             set_cell_margins(cell, top=50, bottom=50, left=50, right=50)
             
     set_table_borders(tbl_comp, color='CBD5E1', sz='4')
+    keep_table_together(tbl_comp)
     
     p_comp_cap = doc.add_paragraph()
     p_comp_cap.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_comp_cap.paragraph_format.space_before = Pt(4)
-    p_comp_cap.paragraph_format.space_after = Pt(12)
+    p_comp_cap.paragraph_format.space_after = Pt(8)
     r_cc = p_comp_cap.add_run("Table 4: Comprehensive Multi-Model Performance Benchmark: Baseline GCN vs. GAT vs. Proposed 3D GIN across 80 Epochs")
     r_cc.font.name = 'Times New Roman'
     r_cc.font.size = Pt(10)
@@ -969,27 +1046,35 @@ def generate_full_report():
     r_cc.font.color.rgb = RGBColor(70, 70, 70)
     
     # Embed Figure 4: three_models_accuracy_loss.png
-    add_centered_image(doc, PROJECT_DIR / "three_models_accuracy_loss.png", Inches(5.8),
+    add_centered_image(doc, PROJECT_DIR / "three_models_accuracy_loss.png", Inches(5.5),
                        "Figure 4: 80-Epoch Training MSE Loss and Classification Accuracy Comparison across GCN, GAT, and Proposed 3D GIN")
     
+    doc.add_page_break()
+    
     # Embed Figure 5: three_models_confusion_matrices.png
-    add_centered_image(doc, PROJECT_DIR / "three_models_confusion_matrices.png", Inches(5.8),
+    add_centered_image(doc, PROJECT_DIR / "three_models_confusion_matrices.png", Inches(4.5),
                        "Figure 5: Side-by-Side Diagnostic Confusion Matrices for GCN, GAT, and Proposed 3D GIN")
     
     # Embed Figure 6: three_models_comparison_bar.png
-    add_centered_image(doc, PROJECT_DIR / "three_models_comparison_bar.png", Inches(5.8),
+    add_centered_image(doc, PROJECT_DIR / "three_models_comparison_bar.png", Inches(3.4),
                        "Figure 6: Grouped Evaluation Metric Comparison across the Three Graph Architectures")
     
-    # Analytical paragraph explaining why GIN outperforms GCN and GAT
-    comp_disc = (
-        "Architectural Justification and Comparative Discussion:\n"
+    p_disc_lbl = add_body_paragraph(doc, "Architectural Justification and Comparative Discussion:")
+    p_disc_lbl.runs[0].font.bold = True
+    p_disc_lbl.runs[0].font.color.rgb = RGBColor(15, 60, 115)
+    
+    comp_disc_1 = (
         "The empirical convergence curves, confusion matrices, and grouped performance metrics illustrated in Figures 4, 5, and 6 "
         "highlight vital structural distinctions across the three graph deep learning architectures. Baseline GCN plateaued at 84.60% accuracy "
         "and a final MSE of 0.148 (validation MAE = 2.15). Its isotropic mean-degree normalization operator averages neighborhood features, "
         "leading to an over-smoothing phenomenon wherein higher-layer residue representations homogenize and fail to capture sharp localized "
         "tertiary distortions. Graph Attention Networks (GAT) improved classification accuracy to 89.10% with an MSE of 0.094 by learning adaptive "
         "attention coefficients between neighboring atoms; however, the multi-head attention mechanism introduces significant parameter overhead, "
-        "making it prone to variance and overfitting on compact structural cohorts (manifested by a validation MAE of 1.62).\n\n"
+        "making it prone to variance and overfitting on compact structural cohorts (manifested by a validation MAE of 1.62)."
+    )
+    add_body_paragraph(doc, comp_disc_1)
+    
+    comp_disc_2 = (
         "In contrast, the Proposed 3D GIN demonstrated decisive superiority across all evaluation dimensions, achieving 94.20% Accuracy, "
         "93.80% Precision, 95.10% Recall, 94.44% F1-Score, a final MSE of 0.052, and an optimal validation MAE of 1.14. This performance leap "
         "stems directly from two architectural advancements: (1) GIN's injective multiset sum-aggregation parameterized by two-layer MLPs provides "
@@ -998,7 +1083,7 @@ def generate_full_report():
         "augmentation protocol (sigma = 0.05 Å) introduces realistic thermal vibrational fluctuations (310 K) that act as an implicit spatial "
         "regularizer, eliminating the overfitting bottleneck common in macromolecular structural deep learning."
     )
-    add_body_paragraph(doc, comp_disc)
+    add_body_paragraph(doc, comp_disc_2)
     
     doc.add_page_break()
     
@@ -1018,17 +1103,16 @@ def generate_full_report():
     )
     add_body_paragraph(doc, concl_p1)
     
-    concl_p2 = (
-        "Future Research Trajectory & Clinical Wet-Lab Extensions:\n"
-        "1. Full-Atom Allosteric Molecular Dynamics (MD): Future iterations will integrate nanosecond-scale explicit-solvent Molecular Dynamics "
-        "(utilizing AMBER and CHARMM force-fields) to simulate the thermodynamic stability and free-energy perturbation (delta-G_bind) of our top docking hits.\n"
-        "2. SE(3)-Equivariant Message Passing: Upgrading from isotropic GINConv to SO(3)/SE(3)-equivariant steerable tensor networks will enable "
-        "explicit rotational coordinate updates directly within hidden layer representations.\n"
-        "3. Experimental Surface Plasmon Resonance (SPR) Assays: Collaborations with academic biochemistry wet-labs are planned to experimentally "
-        "synthesize our top computational hits, measuring in vitro binding kinetics (Kd) via Surface Plasmon Resonance and Thioflavin T (ThT) "
-        "fibrillization inhibition assays."
-    )
-    add_body_paragraph(doc, concl_p2)
+    p_fut_lbl = add_body_paragraph(doc, "Future Research Trajectory & Clinical Wet-Lab Extensions:")
+    p_fut_lbl.runs[0].font.bold = True
+    p_fut_lbl.runs[0].font.color.rgb = RGBColor(15, 60, 115)
+    
+    add_numbered_item(doc, "1. Full-Atom Allosteric Molecular Dynamics (MD):",
+                      "Future iterations will integrate nanosecond-scale explicit-solvent Molecular Dynamics (utilizing AMBER and CHARMM force-fields) to simulate the thermodynamic stability and free-energy perturbation (delta-G_bind) of our top docking hits.")
+    add_numbered_item(doc, "2. SE(3)-Equivariant Message Passing:",
+                      "Upgrading from isotropic GINConv to SO(3)/SE(3)-equivariant steerable tensor networks will enable explicit rotational coordinate updates directly within hidden layer representations.")
+    add_numbered_item(doc, "3. Experimental Surface Plasmon Resonance (SPR) Assays:",
+                      "Collaborations with academic biochemistry wet-labs are planned to experimentally synthesize our top computational hits, measuring in vitro binding kinetics (Kd) via Surface Plasmon Resonance and Thioflavin T (ThT) fibrillization inhibition assays.")
     
     doc.add_page_break()
     
