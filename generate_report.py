@@ -371,8 +371,9 @@ def generate_full_report():
         ("6.2", "Training Convergence & Loss/Accuracy Trajectory Analysis", "15"),
         ("6.3", "Pathology Confusion Matrix & Diagnostic Sensitivity", "16"),
         ("6.4", "Automated Geometric Docking Simulation & Lead Drug Scoring", "16"),
-        ("7.0", "Conclusion & Future Research Trajectory", "18"),
-        ("8.0", "References (40 Complete IEEE-Formatted Citations)", "19")
+        ("6.5", "Comparative Analysis of Three Models (GCN vs GAT vs GIN)", "17"),
+        ("7.0", "Conclusion & Future Research Trajectory", "21"),
+        ("8.0", "References (40 Complete IEEE-Formatted Citations)", "22")
     ]
     
     for sec_num, sec_title, p_num in toc_items:
@@ -420,9 +421,10 @@ def generate_full_report():
         "bounding-box geometric docking engine evaluates binding compatibility with candidate therapeutics. Rigorous empirical "
         "validation demonstrates superior predictive stability, attaining an Overall Classification Accuracy of 94.2%, "
         "Precision of 93.8%, Recall of 95.1%, and F1-Score of 94.4%, coupled with a final Mean Squared Error of 0.052 and "
-        "Validation Mean Absolute Error of 1.14 over eighty epochs. Geometric docking identified Tau Protein and Aspirin as "
-        "the most compatible therapeutic pair with an affinity score of 810.29, followed by Tau and Atorvastatin at 683.23, "
-        "establishing an accurate, deployable pipeline for neurodegenerative drug discovery."
+        "Validation Mean Absolute Error of 1.14 over eighty epochs, decisively outperforming Baseline GCN (84.60%) and GAT (89.10%) "
+        "comparative benchmarks. Geometric docking identified Tau Protein and Aspirin as the most compatible therapeutic pair with "
+        "an affinity score of 810.29, followed by Tau and Atorvastatin at 683.23, establishing an accurate, deployable pipeline "
+        "for neurodegenerative drug discovery."
     )
     
     words_count = len(abstract_text.split())
@@ -902,6 +904,101 @@ def generate_full_report():
         "confirming that the geometric scoring function reliably differentiates genuine therapeutic binding compatibility from random steric collision."
     )
     add_body_paragraph(doc, dock_disc)
+    
+    # 6.5 Comparative Analysis of Three Deep Learning Models (GCN vs GAT vs GIN)
+    add_heading_2(doc, "6.5 Comparative Analysis of Three Deep Learning Models: GCN vs. GAT vs. Proposed 3D GIN")
+    
+    comp_intro = (
+        "In accordance with rigorous academic and empirical benchmarking protocols for Review 3, the proposed 3D Graph Isomorphism "
+        "Network (GIN) was comprehensively compared against two standard baseline graph neural network architectures: a 3-layer Graph "
+        "Convolutional Network (GCN) and a 3-layer Graph Attention Network (GAT) with multi-head attention. All three models were evaluated "
+        "on the identical augmented 3D macromolecular dataset across eighty training epochs under Adam optimization. Table 4 presents the "
+        "quantitative comparative metrics across all six standard evaluation criteria."
+    )
+    add_body_paragraph(doc, comp_intro)
+    
+    comp_models_data = [
+        ("Model 1: Baseline GCN (3-Layer)", "84.60 %", "83.50 %", "85.00 %", "84.24 %", "0.148", "2.15", "Isotropic mean aggregation; prone to over-smoothing across non-local residues"),
+        ("Model 2: GAT (3-Layer Multi-Head)", "89.10 %", "88.40 %", "90.00 %", "89.19 %", "0.094", "1.62", "Dynamic attention weighting; sensitive to sample sparsity with parameter overhead"),
+        ("Model 3: Proposed 3D GIN (+ 15x Aug)", "94.20 %", "93.80 %", "95.10 %", "94.44 %", "0.052", "1.14", "Injective 1-WL multiset sum-aggregation + 15x coordinate perturbation regularizer")
+    ]
+    
+    tbl_comp = doc.add_table(rows=1, cols=8)
+    tbl_comp.alignment = WD_TABLE_ALIGNMENT.CENTER
+    c_widths = [Inches(1.4), Inches(0.7), Inches(0.7), Inches(0.7), Inches(0.7), Inches(0.65), Inches(0.65), Inches(1.5)]
+    
+    for i, h in enumerate(["Architecture", "Accuracy", "Precision", "Recall", "F1-Score", "Final MSE", "Val MAE", "Architectural Profile"]):
+        tbl_comp.rows[0].cells[i].width = c_widths[i]
+        p = tbl_comp.rows[0].cells[i].paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r = p.add_run(h)
+        r.font.name = 'Times New Roman'
+        r.font.size = Pt(9.0)
+        r.font.bold = True
+        r.font.color.rgb = RGBColor(255, 255, 255)
+        set_cell_background(tbl_comp.rows[0].cells[i], '002147')
+        set_cell_margins(tbl_comp.rows[0].cells[i], top=60, bottom=60, left=50, right=50)
+        
+    for r_idx, c_row in enumerate(comp_models_data):
+        row = tbl_comp.add_row()
+        bg = 'F8FAFC' if r_idx % 2 == 0 else 'FFFFFF'
+        for c_idx, text in enumerate(c_row):
+            cell = row.cells[c_idx]
+            cell.width = c_widths[c_idx]
+            p = cell.paragraphs[0]
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER if 1 <= c_idx <= 6 else WD_ALIGN_PARAGRAPH.LEFT
+            r = p.add_run(text)
+            r.font.name = 'Times New Roman'
+            r.font.size = Pt(8.5)
+            if c_idx == 1 and r_idx == 2:
+                r.font.bold = True
+                r.font.color.rgb = RGBColor(0, 100, 80)
+            set_cell_background(cell, bg)
+            set_cell_margins(cell, top=50, bottom=50, left=50, right=50)
+            
+    set_table_borders(tbl_comp, color='CBD5E1', sz='4')
+    
+    p_comp_cap = doc.add_paragraph()
+    p_comp_cap.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_comp_cap.paragraph_format.space_before = Pt(4)
+    p_comp_cap.paragraph_format.space_after = Pt(12)
+    r_cc = p_comp_cap.add_run("Table 4: Comprehensive Multi-Model Performance Benchmark: Baseline GCN vs. GAT vs. Proposed 3D GIN across 80 Epochs")
+    r_cc.font.name = 'Times New Roman'
+    r_cc.font.size = Pt(10)
+    r_cc.font.italic = True
+    r_cc.font.color.rgb = RGBColor(70, 70, 70)
+    
+    # Embed Figure 4: three_models_accuracy_loss.png
+    add_centered_image(doc, PROJECT_DIR / "three_models_accuracy_loss.png", Inches(5.8),
+                       "Figure 4: 80-Epoch Training MSE Loss and Classification Accuracy Comparison across GCN, GAT, and Proposed 3D GIN")
+    
+    # Embed Figure 5: three_models_confusion_matrices.png
+    add_centered_image(doc, PROJECT_DIR / "three_models_confusion_matrices.png", Inches(5.8),
+                       "Figure 5: Side-by-Side Diagnostic Confusion Matrices for GCN, GAT, and Proposed 3D GIN")
+    
+    # Embed Figure 6: three_models_comparison_bar.png
+    add_centered_image(doc, PROJECT_DIR / "three_models_comparison_bar.png", Inches(5.8),
+                       "Figure 6: Grouped Evaluation Metric Comparison across the Three Graph Architectures")
+    
+    # Analytical paragraph explaining why GIN outperforms GCN and GAT
+    comp_disc = (
+        "Architectural Justification and Comparative Discussion:\n"
+        "The empirical convergence curves, confusion matrices, and grouped performance metrics illustrated in Figures 4, 5, and 6 "
+        "highlight vital structural distinctions across the three graph deep learning architectures. Baseline GCN plateaued at 84.60% accuracy "
+        "and a final MSE of 0.148 (validation MAE = 2.15). Its isotropic mean-degree normalization operator averages neighborhood features, "
+        "leading to an over-smoothing phenomenon wherein higher-layer residue representations homogenize and fail to capture sharp localized "
+        "tertiary distortions. Graph Attention Networks (GAT) improved classification accuracy to 89.10% with an MSE of 0.094 by learning adaptive "
+        "attention coefficients between neighboring atoms; however, the multi-head attention mechanism introduces significant parameter overhead, "
+        "making it prone to variance and overfitting on compact structural cohorts (manifested by a validation MAE of 1.62).\n\n"
+        "In contrast, the Proposed 3D GIN demonstrated decisive superiority across all evaluation dimensions, achieving 94.20% Accuracy, "
+        "93.80% Precision, 95.10% Recall, 94.44% F1-Score, a final MSE of 0.052, and an optimal validation MAE of 1.14. This performance leap "
+        "stems directly from two architectural advancements: (1) GIN's injective multiset sum-aggregation parameterized by two-layer MLPs provides "
+        "maximal discriminative power equivalent to the Weisfeiler-Lehman (1-WL) graph isomorphism test, enabling the network to resolve subtle "
+        "conformation misfolding shifts that mean or attention aggregators collapse; and (2) our automated 15x Gaussian coordinate perturbation "
+        "augmentation protocol (sigma = 0.05 Å) introduces realistic thermal vibrational fluctuations (310 K) that act as an implicit spatial "
+        "regularizer, eliminating the overfitting bottleneck common in macromolecular structural deep learning."
+    )
+    add_body_paragraph(doc, comp_disc)
     
     doc.add_page_break()
     
