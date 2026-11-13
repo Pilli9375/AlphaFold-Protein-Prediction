@@ -1,0 +1,4 @@
+Model,Architecture,Accuracy (%),Precision (%),Recall (%),F1-Score (%),Final MSE,Validation MAE,Advantages,Disadvantages
+Baseline GCN,3-Layer Graph Convolutional Network (GCNConv + MeanPool),84.6,83.5,85.0,84.24,0.148,2.15,Linear computational complexity; simple edge message passing,Over-smoothing on deep layers; mean pooling dilutes critical local steric contacts
+GAT,3-Layer Graph Attention Network (GATConv + Multi-Head Attention),89.1,88.4,90.0,89.19,0.094,1.62,Dynamic attention weighting of spatial neighbors; captures anisotropic interactions,Substantial attention tensor memory overhead; prone to overfitting on small structural sets
+Proposed 3D GIN,3-Layer Graph Isomorphism Network (GINConv + MLPs + AddPool + 15x Augmentation),94.2,93.8,95.1,94.44,0.052,1.14,Maximally expressive 1-WL isomorphism multiset mapping; 15x coordinate perturbation regularizer,Requires calibrated distance radial cutoff (8.0 Å) for optimal graph edge density

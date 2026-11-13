@@ -18,7 +18,7 @@ def pdb_to_graph(pdb_file, label=None):
     chain = structure[0]['A']
     residues = [r for r in chain if r.id[0] == ' ']
     aa_dict = {'ALA':0,'ARG':1,'ASN':2,'ASP':3,'CYS':4,'GLU':5,'GLN':6,'GLY':7,'HIS':8,'ILE':9,
-               'LEU':10,'LYS':11,'MET':12,'PHE':13,'PRO':14,'SER':15,'THR':16,'TRP':17,'TYR':18,'VAL':19}
+               'LEU':10,'LYS':11,'MET':a12,'PHE':13,'PRO':14,'SER':15,'THR':16,'TRP':17,'TYR':18,'VAL':19}
     x = torch.zeros(len(residues), 20)
     ca_pos = []
     for i, res in enumerate(residues):
